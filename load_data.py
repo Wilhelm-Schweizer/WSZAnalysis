@@ -22,6 +22,7 @@ path_kunden = path_db+'/Kunden.txt'
 path_adressen = path_db+'/Adressen.txt'
 
 path_umsatz = path_db+'/Umsatz_Kunden.txt'
+path_werk = path_db+'/WerksauftrPos.txt'
 
 # path_kunden = '/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/27.09.21/kunden01.txt'
 # path_adressen = '/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/27.09.21/adressen01.txt'
@@ -30,7 +31,7 @@ path_umsatz = path_db+'/Umsatz_Kunden.txt'
 
 
 
-def tabellen_zusamenfuegen(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz):
+def tabellen_zusamenfuegen(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz,p4 = path_werk):
 
     # print(p1)
 
@@ -42,7 +43,8 @@ def tabellen_zusamenfuegen(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz):
     data = json.load(codecs.open(p3, 'r', 'utf-8-sig'))
     df3 = pd.DataFrame(data)
     # print(df1.head())
-
+    data = json.load(codecs.open(p4, 'r', 'utf-8-sig'))
+    df_werk = pd.DataFrame(data)
 
 
     # df1 = pd.read_csv(p1,delimiter="\t", quoting=csv.QUOTE_NONE, error_bad_lines=False)
@@ -106,6 +108,17 @@ def tabellen_zusamenfuegen(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz):
     # df = df.applymap(lambda x: x.encode('unicode_escape').
     #              decode('utf-8') if isinstance(x, str) else x)
     # print(df.head())
+    # print(df_werk.tail())
+    df_werk['Datum_begin'] = pd.to_datetime(df_werk['Datum_begin'],format = '%Y-%m-%d',errors='coerce')
+    df_werk = df_werk.dropna()
+
+
+    print(df_werk.tail(50))
+
+
+
+
+
     return [simple_merge,df,df_purchases]
 
 

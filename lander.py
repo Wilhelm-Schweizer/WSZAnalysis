@@ -78,7 +78,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         self.comboBox.setCurrentIndex(4)
 
         self.comboBox_3.setItemDelegate(delegate)
-        self.comboBox_3.addItems(['Normal','Cumulativ','Jahresübersicht'])
+        self.comboBox_3.addItems(['Normal','Jahresübersicht','Cumulativ'])
         self.comboBox_3.setCurrentIndex(0)
         self.comboBox_4.setItemDelegate(delegate)
         self.comboBox_4.addItems(['Alle','Privat','Partner'])

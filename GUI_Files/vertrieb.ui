@@ -53,6 +53,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="b_export">
+       <property name="text">
+        <string>Daten Export</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="b_close">
        <property name="text">
         <string>Close</string>
