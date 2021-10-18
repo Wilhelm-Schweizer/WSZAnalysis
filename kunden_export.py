@@ -8,6 +8,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import pandas as pd
+import os
 os.environ['QT_MAC_WANTS_LAYER'] = '1'
 from configparser import ConfigParser
 config = ConfigParser()
@@ -151,7 +152,18 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
         df = df.reset_index(drop = True)
         print(df.tail())
 
-        df.to_csv(path_k_exp+'/'+parms['file']+'.csv',index=False,encoding = 'utf-8-sig')
+
+
+        print(path_k_exp+'/'+parms['file']+'.csv')
+        try:
+            df.to_csv(path_k_exp+'/'+parms['file']+'.csv',index=False,encoding = 'utf-8-sig')
+        except:
+            try:
+                os.mkdir(path_k_exp+'/'+parms['file'].split('/')[0])
+                print(path_k_exp+'/'+parms['file'].split('/')[0])
+                df.to_csv(path_k_exp + '/' + parms['file'] + '.csv', index=False, encoding='utf-8-sig')
+            except:
+                pass
 
         self.dic = shelve.open('helper/export_settings')
         self.dic.update(parms)
