@@ -76,8 +76,10 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         delegate = QStyledItemDelegate()
         self.comboBox.setItemDelegate(delegate)
         self.comboBox.addItems(['1 Jahr - ' +str(dt.today().year -1),'2 Jahre - ' +str(dt.today().year -2),'3 Jahre - ' +str(dt.today().year -3),'4 Jahre - ' +str(dt.today().year -4),'5 Jahre - ' +str(dt.today().year -5),'10 Jahre - ' +str(dt.today().year -10),'20 Jahre - ' +str(dt.today().year -20)])
-        self.comboBox.setCurrentIndex(4)
-
+        self.comboBox.setCurrentIndex(5)
+        self.comboBox_2.setItemDelegate(delegate)
+        self.comboBox_2.addItems(['Normal','Jahresübersicht','Kumulativ','Durchschnitt Bestellung'])
+        self.comboBox_2.setCurrentIndex(0)
 
 
         # print(self.bm)
@@ -111,7 +113,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
 
 
         datum = self.comboBox.currentText().split('-')[1]
-        if self.checkBox.isChecked() == True:
+        if self.comboBox_2.currentText() == 'Jahresübersicht':
             datum = ' 2000'
 
         df1['Periode'] = pd.to_datetime(df1['Periode'], format='%Y%m', errors='coerce')
@@ -132,7 +134,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         #         df1['Preisgruppe'][i]= df.loc[df['KundenNr']==r['KundenNr']]['Preisgruppe'].reset_index(drop=True)[0]
         #     except:
         #         df1['Preisgruppe'][i] =0
-        print(df1.tail())
+        # print(df1.tail())
         df1['year'] = df1['Periode'].dt.year
         df1['month'] = 0
 
@@ -143,7 +145,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         self.df_pa = df_pa
         self.df_ges = df_ges
 
-        if self.checkBox.isChecked()==True:
+        if self.comboBox_2.currentText() == 'Jahresübersicht':
 
             annual_ges = [df1[df1['year'] == y] for y in df1['year'].unique()]
 
@@ -178,9 +180,9 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
 
             dic = {self.checkBox_2:[annual_ges,'Gesamt'],self.checkBox_3:[annual_pr,'Privat'],self.checkBox_4:[annual_pa,'Partner']}
         else:
-            df_pr = df_pr.groupby('Periode')['EUR_sum'].sum().reset_index()
-            df_pa = df_pa.groupby('Periode')['EUR_sum'].sum().reset_index()
-            df_ges = df1.groupby('Periode')['EUR_sum'].sum().reset_index()
+            df_pr = df_pr
+            df_pa = df_pa
+            df_ges = df1
             dic = {self.checkBox_2: [df_ges, 'Gesamt'], self.checkBox_3: [df_pr, 'Privat'],
                    self.checkBox_4: [df_pa, 'Partner']}
 
@@ -188,15 +190,16 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
 
 
             if k.isChecked()==True:
+                MA_win = 24
                 lbl = QLabel()
                 lbl.setText(dic[k][1])
                 lbl.setAlignment(Qt.AlignCenter)
                 self.verticalLayout.addWidget(lbl)
-                if self.checkBox.isChecked() == False:
+                if self.comboBox_2.currentText() == 'Normal':
 
 
 
-                    self.plt_df = dic[k][0]
+                    self.plt_df = dic[k][0].groupby('Periode')['EUR_sum'].sum().reset_index()
 
 
 
@@ -210,7 +213,11 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
                     self.graphWidget.addLine(x=None, y=0, pen=pg.mkPen('r', width=3))
                     self.graphWidget.sizeHint = lambda: pg.QtCore.QSize(100, 100)
 
-                else:
+                    self.plt_df['MA'] = self.plt_df['EUR_sum'].rolling(window=MA_win).mean()
+                    self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, self.plt_df['MA'],
+                                          pen=pg.mkPen('g', width=5),name = str(MA_win)+"MO MA")
+
+                elif self.comboBox_2.currentText() == 'Jahresübersicht':
                     self.graphWidget = pg.PlotWidget()
                     self.verticalLayout.addWidget(self.graphWidget, 0)
                     self.graphWidget.addLegend()
@@ -222,6 +229,47 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
                     self.graphWidget.showGrid(x=True,y=True)
                     self.graphWidget.addLine(x=None, y=0, pen=pg.mkPen('r', width=3))
                     self.graphWidget.sizeHint = lambda: pg.QtCore.QSize(100, 100)
+                elif self.comboBox_2.currentText() == 'Kumulativ':
+
+
+
+                    self.plt_df = dic[k][0].groupby('Periode')['EUR_sum'].sum().reset_index()
+                    self.plt_df['r_sum'] = self.plt_df['EUR_sum'].expanding(2).sum()
+
+
+                    dates = self.plt_df['Periode']
+                    date_axis = pg.graphicsItems.DateAxisItem.DateAxisItem(orientation='bottom')
+                    self.graphWidget = pg.PlotWidget(axisItems = {'bottom': date_axis})
+                    self.verticalLayout.addWidget(self.graphWidget,0)
+                    self.graphWidget.addLegend()
+                    self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, self.plt_df['r_sum'])
+                    self.graphWidget.showGrid(x=True,y=True)
+                    self.graphWidget.addLine(x=None, y=0, pen=pg.mkPen('r', width=3))
+                    self.graphWidget.sizeHint = lambda: pg.QtCore.QSize(100, 100)
+                elif self.comboBox_2.currentText() == 'Durchschnitt Bestellung':
+
+
+
+                    self.plt_df = dic[k][0]
+                    print(self.plt_df.tail())
+                    self.plt_df = self.plt_df.groupby('Periode')['EUR_sum'].mean().reset_index()
+                    print(self.plt_df.tail())
+
+
+                    dates = self.plt_df['Periode']
+                    date_axis = pg.graphicsItems.DateAxisItem.DateAxisItem(orientation='bottom')
+                    self.graphWidget = pg.PlotWidget(axisItems = {'bottom': date_axis})
+                    self.verticalLayout.addWidget(self.graphWidget,0)
+                    self.graphWidget.addLegend()
+                    self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, self.plt_df['EUR_sum'])
+                    self.graphWidget.showGrid(x=True,y=True)
+                    self.graphWidget.addLine(x=None, y=0, pen=pg.mkPen('r', width=3))
+                    self.graphWidget.sizeHint = lambda: pg.QtCore.QSize(100, 100)
+
+                    self.plt_df['MA'] = self.plt_df['EUR_sum'].rolling(window=MA_win).mean()
+                    self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, self.plt_df['MA'], pen=pg.mkPen('g', width=5),name = str(MA_win)+"MO MA")
+
+
 
 
                 # bm_date = self.bm['Date'].reset_index(drop=True)

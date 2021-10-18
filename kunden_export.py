@@ -40,7 +40,7 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
 
 
 
-
+        self.data=data
 
 
 
@@ -109,7 +109,7 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
 
 
 
-        df = data
+        df = self.data
 
 
 
