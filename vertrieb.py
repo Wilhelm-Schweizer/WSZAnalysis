@@ -15,8 +15,8 @@ config.read('config.ini')
 from preisgruppen import MyApp1 as preisgruppen
 from lander import MyApp1 as lander
 from kunden import MyApp1 as kunden
-from settings import MyApp1 as settings
-import load_data
+from kunden_export import MyApp1 as kunden_export
+
 #
 
 # path = os.path.dirname(__file__) #uic paths from itself, not the active dir, so path needed
@@ -48,6 +48,7 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
         self.b_pg.clicked.connect(self.preisgruppen_win)
         self.b_Lander.clicked.connect(self.lander_win)
         self.b_kunden.clicked.connect(self.kunden_win)
+        self.b_export.clicked.connect(self.kunden_exp_win)
         # self.b_settings.clicked.connect(self.settings_win)
         # self.setStyleSheet(qdarkstyle.load_stylesheet())
 
@@ -79,7 +80,10 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
         dialog = kunden([self.df_gesamt, self.df_purchases])
         self.dialogs.append(dialog)
         dialog.show()
-
+    def kunden_exp_win(self):
+        dialog = kunden_export(self.df_gesamt)
+        self.dialogs.append(dialog)
+        dialog.show()
 
 
 

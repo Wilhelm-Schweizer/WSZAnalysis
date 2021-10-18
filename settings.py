@@ -13,7 +13,9 @@ config = ConfigParser()
 conf_path = 'config.ini'
 config.read(conf_path)
 
-path = config.get('main', 'path_db')
+
+path_k_exp = config.get('main', 'k_exp_path')
+path_db = config.get('main', 'path_db')
 dark_mode = config.get('main', 'dark_mode')
 
 # path = os.path.dirname(__file__) #uic paths from itself, not the active dir, so path needed
@@ -30,33 +32,38 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
 
         # self.port_in.setText(config.get('main', 'ibkr_port'))
 
+        dark_mode = config.get('main', 'dark_mode')
+        if dark_mode == 'True':
+            self.setStyleSheet(qdarkstyle.load_stylesheet())
+            # self.logo.setPixmap(QPixmap("GUI_Files/logo_dark.png").transformed(QTransform().rotate(-90)))
 
 
-        self.comboBox.addItems(['An','Aus'])
 
-
-
+        self.delegate = QtWidgets.QStyledItemDelegate()
+        self.comboBox.addItems(['An', 'Aus'])
         if dark_mode == 'True':
             self.setStyleSheet(qdarkstyle.load_stylesheet())
             self.comboBox.setCurrentIndex(0)
         else:
             self.comboBox.setCurrentIndex(1)
 
-
-
-
-        self.delegate = QtWidgets.QStyledItemDelegate()
         self.comboBox.setItemDelegate(self.delegate)
+
+
+        self.lineEdit.setText(path_db)
+        self.lineEdit_2.setText(path_k_exp)
+
+
 
         #set up callbacks
 
         self.b_close.clicked.connect(self.close)
-        self.b_save_port.clicked.connect(self.save_port)
+        self.b_save_port.clicked.connect(self.save)
 
 
 
 
-    def save_port(self):
+    def save(self):
 
         if self.comboBox.currentText() == 'An':
             dark_mode = 'True'
@@ -65,6 +72,8 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
 
 
         # port =self.port_in.text()
+        config.set('main', 'path_db', self.lineEdit.text())
+        config.set('main', 'k_exp_path', self.lineEdit_2.text())
         config.set('main', 'dark_mode', dark_mode)
         with open(conf_path, 'w') as f:
             config.write(f)

@@ -78,7 +78,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         self.comboBox.setCurrentIndex(4)
 
         self.comboBox_3.setItemDelegate(delegate)
-        self.comboBox_3.addItems(['Normal','Jahresübersicht','Cumulativ'])
+        self.comboBox_3.addItems(['Normal','Jahresübersicht','Kumulativ'])
         self.comboBox_3.setCurrentIndex(0)
         self.comboBox_4.setItemDelegate(delegate)
         self.comboBox_4.addItems(['Alle','Privat','Partner'])
@@ -197,7 +197,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
             self.graphWidget.showGrid(x=True,y=True)
             self.graphWidget.addLine(x=None, y=0, pen=pg.mkPen('r', width=3))
             self.graphWidget.sizeHint = lambda: pg.QtCore.QSize(100, 100)
-        elif self.comboBox_3.currentText() == 'Cumulativ':
+        elif self.comboBox_3.currentText() == 'Kumulativ':
             plt_df = df1.loc[df1['Land'] == land]
             plt_df = plt_df.groupby('Periode')['EUR_sum'].sum().reset_index()
             plt_df['r_sum'] = plt_df['EUR_sum'].expanding(2).sum()

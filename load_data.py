@@ -113,9 +113,10 @@ def tabellen_zusamenfuegen(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz,p
     df_werk = df_werk.dropna()
 
 
-    print(df_werk.tail(50))
+    # print(df_werk.tail(50))
 
-
+    df['AufnahmeDatum'] = pd.to_datetime(df['AufnahmeDatum'], format='%Y-%m-%d', errors='coerce')
+    df['letzteLieferung'] = pd.to_datetime(df['letzteLieferung'], format='%Y-%m-%d', errors='coerce')
 
 
 
