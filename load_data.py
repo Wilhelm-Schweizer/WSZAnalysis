@@ -120,7 +120,7 @@ def tabellen_zusamenfuegen(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz,p
 
 
 
-    return [simple_merge,df,df_purchases]
+    return [simple_merge,df,df_purchases,df_werk]
 
 
 

@@ -67,10 +67,14 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         self.b_stats.clicked.connect(self.pg_stats_win)
         self.logo.setScaledContents(True)
         self.logo.setPixmap(QPixmap("GUI_Files/logo.png").transformed(QTransform().rotate(-90)))
-        dark_mode = config.get('main', 'dark_mode')
-        if dark_mode == 'True':
+        self.dark_mode = config.get('main', 'dark_mode')
+        self.main_col = 'k'
+        if self.dark_mode == 'True':
             self.setStyleSheet(qdarkstyle.load_stylesheet())
             self.logo.setPixmap(QPixmap("GUI_Files/logo_dark.png").transformed(QTransform().rotate(-90)))
+            self.main_col = 'w'
+
+
         self.checkBox_2.setChecked(True)
 
         delegate = QStyledItemDelegate()
@@ -78,7 +82,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         self.comboBox.addItems(['1 Jahr - ' +str(dt.today().year -1),'2 Jahre - ' +str(dt.today().year -2),'3 Jahre - ' +str(dt.today().year -3),'4 Jahre - ' +str(dt.today().year -4),'5 Jahre - ' +str(dt.today().year -5),'10 Jahre - ' +str(dt.today().year -10),'20 Jahre - ' +str(dt.today().year -20)])
         self.comboBox.setCurrentIndex(5)
         self.comboBox_2.setItemDelegate(delegate)
-        self.comboBox_2.addItems(['Normal','Jahresübersicht','Kumulativ','Durchschnitt Bestellung'])
+        self.comboBox_2.addItems(['Normal','Jahresübersicht','Kumulativ','Durchschnitt Bestellung','Vergleich'])
         self.comboBox_2.setCurrentIndex(0)
 
 
@@ -145,7 +149,56 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         self.df_pa = df_pa
         self.df_ges = df_ges
 
-        if self.comboBox_2.currentText() == 'Jahresübersicht':
+
+        if self.comboBox_2.currentText() == 'Vergleich':
+
+            df_pr = df_pr.groupby('Periode')['EUR_sum'].sum().reset_index().rename(columns={'EUR_sum':'Privat'})
+            df_pa = df_pa.groupby('Periode')['EUR_sum'].sum().reset_index().rename(columns={'EUR_sum':'Partner'})
+            df_merge = df_pa.merge(df_pr,on='Periode').reset_index(drop=True)
+            df_merge['sum'] = df_merge['Privat'] + df_merge['Partner']
+            df_merge['Pr%'] = df_merge['Privat']/df_merge['sum']
+            df_merge['Pa%'] = df_merge['Partner'] / df_merge['sum']
+
+            df_merge['Pr%'] = df_merge['Pr%'].rolling(window=12).mean()
+            df_merge['Pa%'] = df_merge['Pa%'].rolling(window=12).mean()
+            df_merge = df_merge.loc[df_merge['Pr%'] > 0].reset_index(drop=True)
+
+
+            dates = df_merge['Periode']
+            date_axis = pg.graphicsItems.DateAxisItem.DateAxisItem(orientation='bottom')
+            self.graphWidget = pg.PlotWidget(axisItems={'bottom': date_axis})
+            self.verticalLayout.addWidget(self.graphWidget)
+            self.graphWidget.addLegend()
+            df_merge = df_merge[['Periode','Pr%','Pa%']].rename(columns={'Pr%':'Privat','Pa%':'Partner'})
+            df_merge.reindex(df_merge.mean().sort_values().index, axis=1)
+
+            df_merge['sum'] = 1
+            col = ['g', 'y', 'b', 'w']
+            x = 0
+
+            for c in list(df_merge)[1:-1]:  # list(reversed(list(df1)))[1:-1]:
+                if x != 0:
+                    df_merge['sum'] = df_merge['sum'] - df_merge[list(df_merge)[x]]
+                print(c)
+
+                self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, df_merge['sum'], fillLevel=0, name=c,
+                                      fillBrush=col[x], pen=col[x])
+
+                x += 1
+
+            self.graphWidget.showGrid(x=True, y=True)
+            self.graphWidget.addLine(x=None, y=0, pen=pg.mkPen('r', width=3))
+            self.graphWidget.sizeHint = lambda: pg.QtCore.QSize(100, 100)
+            if self.dark_mode != 'True':
+                self.graphWidget.setBackground('w')
+            return
+
+
+
+
+
+
+        elif self.comboBox_2.currentText() == 'Jahresübersicht':
 
             annual_ges = [df1[df1['year'] == y] for y in df1['year'].unique()]
 
@@ -208,7 +261,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
                     self.graphWidget = pg.PlotWidget(axisItems = {'bottom': date_axis})
                     self.verticalLayout.addWidget(self.graphWidget,0)
                     self.graphWidget.addLegend()
-                    self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, self.plt_df['EUR_sum'])
+                    self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, self.plt_df['EUR_sum'],pen = pg.mkPen(self.main_col, width=5))
                     self.graphWidget.showGrid(x=True,y=True)
                     self.graphWidget.addLine(x=None, y=0, pen=pg.mkPen('r', width=3))
                     self.graphWidget.sizeHint = lambda: pg.QtCore.QSize(100, 100)
@@ -242,7 +295,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
                     self.graphWidget = pg.PlotWidget(axisItems = {'bottom': date_axis})
                     self.verticalLayout.addWidget(self.graphWidget,0)
                     self.graphWidget.addLegend()
-                    self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, self.plt_df['r_sum'])
+                    self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, self.plt_df['r_sum'],pen = pg.mkPen(self.main_col, width=5))
                     self.graphWidget.showGrid(x=True,y=True)
                     self.graphWidget.addLine(x=None, y=0, pen=pg.mkPen('r', width=3))
                     self.graphWidget.sizeHint = lambda: pg.QtCore.QSize(100, 100)
@@ -261,14 +314,15 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
                     self.graphWidget = pg.PlotWidget(axisItems = {'bottom': date_axis})
                     self.verticalLayout.addWidget(self.graphWidget,0)
                     self.graphWidget.addLegend()
-                    self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, self.plt_df['EUR_sum'])
+                    self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, self.plt_df['EUR_sum'],pen = pg.mkPen(self.main_col, width=5))
                     self.graphWidget.showGrid(x=True,y=True)
                     self.graphWidget.addLine(x=None, y=0, pen=pg.mkPen('r', width=3))
                     self.graphWidget.sizeHint = lambda: pg.QtCore.QSize(100, 100)
 
                     self.plt_df['MA'] = self.plt_df['EUR_sum'].rolling(window=MA_win).mean()
                     self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, self.plt_df['MA'], pen=pg.mkPen('g', width=5),name = str(MA_win)+"MO MA")
-
+                if self.dark_mode != 'True':
+                    self.graphWidget.setBackground('w')
 
 
 

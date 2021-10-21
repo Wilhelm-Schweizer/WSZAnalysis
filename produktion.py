@@ -37,8 +37,7 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
 
         # self.simple_merge, self.df_gesamt, self.df_purchases = load_data.tabellen_zusamenfuegen()
 
-        self.df_gesamt=data[0]
-        self.df_purchases = data[1]
+        self.df_werk = data
 
         #set up callbacks
         self.logo.setScaledContents(True)
@@ -65,7 +64,7 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
 
 
     def werksauftraege_win(self):
-        dialog = werksauftraege([self.df_gesamt,self.df_purchases])
+        dialog = werksauftraege(self.df_werk)
         self.dialogs.append(dialog)
         dialog.show()
 

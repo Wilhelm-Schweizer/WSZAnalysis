@@ -160,7 +160,7 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
         except:
             try:
                 os.mkdir(path_k_exp+'/'+parms['file'].split('/')[0])
-                print(path_k_exp+'/'+parms['file'].split('/')[0])
+                # print(path_k_exp+'/'+parms['file'].split('/')[0])
                 df.to_csv(path_k_exp + '/' + parms['file'] + '.csv', index=False, encoding='utf-8-sig')
             except:
                 pass

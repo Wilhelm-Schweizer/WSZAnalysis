@@ -35,7 +35,7 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
 
         # self.port_in.setText(config.get('main', 'ibkr_port'))
 
-        self.simple_merge, self.df_gesamt, self.df_purchases = load_data.tabellen_zusamenfuegen()
+        self.simple_merge, self.df_gesamt, self.df_purchases,self.df_werk = load_data.tabellen_zusamenfuegen()
 
 
 
@@ -70,7 +70,7 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
         dialog.show()
 
     def produktion_win(self):
-        dialog = produktion([self.df_gesamt,self.df_purchases])
+        dialog = produktion(self.df_werk)
         self.dialogs.append(dialog)
         dialog.show()
 
