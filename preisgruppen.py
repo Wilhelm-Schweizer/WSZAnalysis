@@ -9,7 +9,7 @@ from PyQt5.QtCore import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
 import numpy as np
-
+from ipywidgets import interact, interactive, fixed, interact_manual
 from datetime import datetime as dt
 from datetime import timedelta
 from configparser import ConfigParser
@@ -25,8 +25,10 @@ config = ConfigParser()
 config.read('config.ini')
 
 
-
-
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+from mpl_toolkits.mplot3d import Axes3D
 
 
 
@@ -100,6 +102,30 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         # self.plt_df = self.df
         self.refresh()
         self.create_plot()
+
+
+    def d_plot(self):
+        x = 1
+        print(self.threed_plts)
+        fig = plt.figure()
+        for key in list(self.threed_plts.keys()):
+            print(key)
+            df = self.threed_plts[key]
+            df = df.sort_values('year',ascending=True).reset_index(drop=True)
+
+            ax = fig.add_subplot(1, len(list(self.threed_plts.keys())), x, projection='3d')
+            ax.plot_trisurf(df.month, df.year, df.EUR_sum, cmap=cm.jet, linewidth=0.2)
+            ax.set_ylim(df.tail(1).reset_index(drop=True)['year'][0],df.year.loc[0])
+            print(reversed(pd.unique(df['year'])))
+            lst =list(reversed(pd.unique(df['year'])))[::2]
+            ax.set_yticks(lst)
+            ax.set_title(key)
+
+
+            x+=1
+
+        fig.tight_layout()
+        plt.show()
 
 
 
@@ -209,6 +235,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
             for i in annual_ges:
                 annual_ges[x] = i.groupby('Periode')['EUR_sum'].sum().reset_index()
                 annual_ges[x]['month'] = annual_ges[x]['Periode'].dt.month
+                annual_ges[x]['year'] = annual_ges[x]['Periode'].dt.year
                 # print(annaul_ges[x].tail(20))
 
                 x += 1
@@ -217,18 +244,29 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
             for i in annual_pr:
                 annual_pr[x] = i.groupby('Periode')['EUR_sum'].sum().reset_index()
                 annual_pr[x]['month'] = annual_pr[x]['Periode'].dt.month
-                print(annual_pr[x].tail(20))
+                annual_pr[x]['year'] = annual_pr[x]['Periode'].dt.year
+                # print(annual_pr[x].tail(20))
 
                 x += 1
 
             # print(annaul_pr)
             x = 0
+
             for i in annual_pa:
                 annual_pa[x] = i.groupby('Periode')['EUR_sum'].sum().reset_index()
                 annual_pa[x]['month'] = annual_pa[x]['Periode'].dt.month
+                annual_pa[x]['year'] = annual_pa[x]['Periode'].dt.year
                 print(annual_pa[x].tail(20))
 
+
+
+
                 x += 1
+
+
+
+
+
 
 
             dic = {self.checkBox_2:[annual_ges,'Gesamt'],self.checkBox_3:[annual_pr,'Privat'],self.checkBox_4:[annual_pa,'Partner']}
@@ -239,6 +277,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
             dic = {self.checkBox_2: [df_ges, 'Gesamt'], self.checkBox_3: [df_pr, 'Privat'],
                    self.checkBox_4: [df_pa, 'Partner']}
 
+        self.threed_plts = {}
         for k in dic.keys():
 
 
@@ -274,6 +313,11 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
                     self.graphWidget = pg.PlotWidget()
                     self.verticalLayout.addWidget(self.graphWidget, 0)
                     self.graphWidget.addLegend()
+                    ges_df = pd.DataFrame()
+                    for i in dic[k][0]:
+                        ges_df = ges_df.append(i)
+                    self.threed_plts[dic[k][1]]=ges_df
+
                     for i in dic[k][0][0:-2]:
                         self.graphWidget.plot(i['month'], i['EUR_sum'],)
 
@@ -337,6 +381,14 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
 
 
     def refresh(self):
+        for i in reversed(range(self.verticalLayout_2.count())):
+            self.verticalLayout_2.itemAt(i).widget().setParent(None)
+
+
+        if self.comboBox_2.currentText() == 'Jahresübersicht':
+            self.Button_1 = QPushButton("3D")
+            self.verticalLayout_2.addWidget(self.Button_1)
+            self.Button_1.clicked.connect(self.d_plot)
 
 
         # if self.comboBox.currentText() == 'All extended':
@@ -392,13 +444,15 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
 
 
 
-def preisgruppenGUI():
+def preisgruppenGUI(data):
     app = QApplication(sys.argv) #instantiate a QtGui (holder for the app)
     # app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    window = MyApp1()
+    window = MyApp1(data)
     window.show()
     sys.exit(app.exec_())
 
 
 if __name__ == "__main__":
-    preisgruppenGUI()
+    import load_data
+    data = load_data.tabellen_zusamenfuegen()[1:3]
+    preisgruppenGUI(data)
