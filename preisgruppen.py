@@ -9,7 +9,7 @@ from PyQt5.QtCore import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
 import numpy as np
-from ipywidgets import interact, interactive, fixed, interact_manual
+
 from datetime import datetime as dt
 from datetime import timedelta
 from configparser import ConfigParser
