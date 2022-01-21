@@ -35,8 +35,8 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
 
         # self.port_in.setText(config.get('main', 'ibkr_port'))
 
-        self.simple_merge, self.df_gesamt, self.df_purchases,self.df_werk = load_data.tabellen_zusamenfuegen()
-
+        self.simple_merge, self.df_gesamt, self.df_purchases,df = load_data.vertrieb()
+        self.df_werk = load_data.produktion()
 
 
 

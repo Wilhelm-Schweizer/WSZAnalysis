@@ -280,7 +280,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         self.threed_plts = {}
         for k in dic.keys():
 
-
+            print(k)
             if k.isChecked()==True:
                 MA_win = 24
                 lbl = QLabel()
@@ -320,9 +320,9 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
 
                     for i in dic[k][0][0:-2]:
                         self.graphWidget.plot(i['month'], i['EUR_sum'],)
-
-                    self.graphWidget.plot(dic[k][0][-2]['month'], dic[k][0][-2]['EUR_sum'], pen=pg.mkPen('b', width=5),name = dt.today().year - 1)
-                    self.graphWidget.plot(dic[k][0][-1]['month'], dic[k][0][-1]['EUR_sum'], pen=pg.mkPen('g', width=7),name = dt.today().year)
+                    print(dic[k][0][-2])
+                    self.graphWidget.plot(dic[k][0][-2]['month'], dic[k][0][-2]['EUR_sum'], pen=pg.mkPen('b', width=5),name = dic[k][0][-2]['year'][0])
+                    self.graphWidget.plot(dic[k][0][-1]['month'], dic[k][0][-1]['EUR_sum'], pen=pg.mkPen('g', width=7),name = dic[k][0][-1]['year'][0])
                     self.graphWidget.showGrid(x=True,y=True)
                     self.graphWidget.addLine(x=None, y=0, pen=pg.mkPen('r', width=3))
                     self.graphWidget.sizeHint = lambda: pg.QtCore.QSize(100, 100)
@@ -454,5 +454,5 @@ def preisgruppenGUI(data):
 
 if __name__ == "__main__":
     import load_data
-    data = load_data.tabellen_zusamenfuegen()[1:3]
+    data = load_data.vertrieb()[1:3]
     preisgruppenGUI(data)

@@ -42,7 +42,7 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
 
 
         self.data=data
-
+        print(self.data)
 
 
 
@@ -85,7 +85,7 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
         self.comboBox_4.setCurrentIndex(self.dic.get('land')[1])
         print(data.tail())
         self.comboBox_5.setItemDelegate(self.delegate)
-        self.comboBox_5.addItems(['Keine','Land','Land & PLZ'])
+        self.comboBox_5.addItems(['Keine','Land','Land & PLZ','letzteLieferung'])
         self.comboBox_5.setCurrentIndex(self.dic.get('sort')[1])
 
         self.checkBox.setChecked(self.dic.get('werb'))
@@ -99,8 +99,8 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
     def save(self):
 
         parms = {'file':self.lineEdit.text(),
-                 'best_ab':[self.comboBox.currentText(),self.comboBox.currentIndex()],
-                 'aufg_ab':[self.comboBox_2.currentText(),self.comboBox_2.currentIndex()],
+                 'best_ab':[self.comboBox_2.currentText(),self.comboBox.currentIndex()],
+                 'aufg_ab':[self.comboBox.currentText(),self.comboBox_2.currentIndex()],
                  'preisg':[self.comboBox_3.currentText(),self.comboBox_3.currentIndex()],
                  'land':[self.comboBox_4.currentText(),self.comboBox_4.currentIndex()],
                  'sort':[self.comboBox_5.currentText(),self.comboBox_5.currentIndex()],
@@ -110,27 +110,32 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
 
 
 
-        df = self.data
+        df = self.data.sort_values('letzteLieferung').reset_index(drop=True)
 
+        print(len(df))
 
 
         if parms['best_ab'][0] != 'Alle':
             y = dt.strptime(parms['best_ab'][0],'%Y')
+
+            print(y)
             df = df.loc[df['letzteLieferung']>y]
 
 
 
         if parms['aufg_ab'][0] != 'Alle':
             y = dt.strptime(parms['aufg_ab'][0],'%Y')
+            print(y)
             df = df.loc[df['AufnahmeDatum']>y]
 
+        print(len(df))
 
         if parms['preisg'][0] != 'Alle':
             if parms['preisg'][0] == 'Privat':
-                df = df.loc[df['Preisgruppe']==1]
+                df = df.loc[df['Preisgruppe'].astype(int)==1]
             elif parms['preisg'][0] == 'Partner':
-                df = df.loc[df['Preisgruppe']==2]
-
+                df = df.loc[df['Preisgruppe'].astype(int)==2]
+        print(len(df))
         if parms['land'][0] != 'Alle' and parms['land'][0] != 'Inland' and parms['land'][0] != 'Ausland':
             df = df[df['Land'] == parms['land'][0]]
         elif parms['land'][0] == 'Inland':
@@ -142,6 +147,7 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
             df = df.sort_values(['Land', 'PLZ'])
         elif parms['sort'][0] != 'Keine':
             df=df.sort_values(parms['sort'][0])
+        print(len(df))
 
         if parms['werb'] == True:
 
@@ -150,8 +156,11 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
             df = df.loc[df['E_Werbung'] != 1]
 
         df = df.reset_index(drop = True)
-        print(df.tail())
+        print(df.tail(50))
 
+        df['name'] = df['Vorname'] + ' '+ df['Name1']
+        df['PLZ_Ort'] = df['PLZ'] + ' '+ df['Ort']
+        df = df[['KundenNr','name','Name2','Strasse','Land','PLZ_Ort']]
 
 
         print(path_k_exp+'/'+parms['file']+'.csv')
@@ -185,5 +194,5 @@ def settingsGUI(data):
 
 if __name__ == "__main__":
     import load_data
-    data = load_data.tabellen_zusamenfuegen()[1]
+    data = load_data.vertrieb()[1]
     settingsGUI(data)

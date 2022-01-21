@@ -320,8 +320,9 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
             for i in annual[0:-2]:
                 self.graphWidget.plot(i['month'], i['EUR_sum'],)
 
-            self.graphWidget.plot(annual[-2]['month'], annual[-2]['EUR_sum'], pen=pg.mkPen('b', width=5),name = dt.today().year - 1)
-            self.graphWidget.plot(annual[-1]['month'], annual[-1]['EUR_sum'], pen=pg.mkPen('g', width=7),name = dt.today().year)
+            print(annual[-2])
+            self.graphWidget.plot(annual[-2]['month'], annual[-2]['EUR_sum'], pen=pg.mkPen('b', width=5),name = annual[-2]['Periode'][0].year)
+            self.graphWidget.plot(annual[-1]['month'], annual[-1]['EUR_sum'], pen=pg.mkPen('g', width=7),name = annual[-1]['Periode'][0].year)
             self.graphWidget.showGrid(x=True,y=True)
             self.graphWidget.addLine(x=None, y=0, pen=pg.mkPen('r', width=3))
             self.graphWidget.sizeHint = lambda: pg.QtCore.QSize(100, 100)

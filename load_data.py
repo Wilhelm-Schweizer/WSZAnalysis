@@ -6,6 +6,7 @@ from datetime import timedelta
 import csv
 import codecs
 import json
+pd.options.display.width = 0
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
@@ -23,7 +24,9 @@ path_adressen = path_db+'/Adressen.txt'
 
 path_umsatz = path_db+'/Umsatz_Kunden.txt'
 path_werk = path_db+'/WerksauftrPos.txt'
-
+path_belegepos = path_db + '/Belege_Pos.txt'
+# path_belegepos ='/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/TEST/Belege_Pos.txt'
+path_belege = path_db + '/Belege.txt'
 # path_kunden = '/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/27.09.21/kunden01.txt'
 # path_adressen = '/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/27.09.21/adressen01.txt'
 # path_kunden = '/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/Datenbank-Export/4D-Datenbankexport/Kunden.txt'
@@ -31,7 +34,12 @@ path_werk = path_db+'/WerksauftrPos.txt'
 
 
 
-def tabellen_zusamenfuegen(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz,p4 = path_werk):
+
+
+
+
+
+def vertrieb(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz,p4 = path_belege,p5=path_belegepos):
 
     # print(p1)
 
@@ -42,9 +50,48 @@ def tabellen_zusamenfuegen(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz,p
     df2 = pd.DataFrame(data)
     data = json.load(codecs.open(p3, 'r', 'utf-8-sig'))
     df3 = pd.DataFrame(data)
-    # print(df1.head())
     data = json.load(codecs.open(p4, 'r', 'utf-8-sig'))
-    df_werk = pd.DataFrame(data)
+    df4 = pd.DataFrame(data)
+    data = json.load(codecs.open(p5, 'r', 'utf-8-sig'))
+    df5 = pd.DataFrame(data)
+    # print(df1.head())
+    # print(df4.head())
+    # print(df5.head())
+
+
+
+    # df5 = df5.tail(500000)
+    # df5.to_json('/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/TEST/Belege_Pos.txt')
+
+    print(df4.tail())
+
+    df4 = df4[['Papierart','PapierNr','KundenNr','Datum','ID','Endbetrag','Anzahl_Teile','Zahlungsart_A','Preisgruppe']]
+    df4['PapierNr'] = df4['PapierNr'].astype(int)
+    df5 =df5[['AbsNr','ArtNr','Bezeichnung','Menge','Preis','Pos Betrag']]
+
+    df4 = df4.rename(columns={'ID':'ID_MATCH'})
+    df5 = df5.rename(columns={'AbsNr': 'ID_MATCH'})
+
+    df_purch_pos = df5.merge(df4,on = 'ID_MATCH',how = 'left')
+
+    df_purch_pos['%_endbetrag'] = df_purch_pos['Pos Betrag']/df_purch_pos['Endbetrag']
+    df_purch_pos['%_teile'] = df_purch_pos['Menge']/df_purch_pos['Anzahl_Teile']
+    df_purch_pos = df_purch_pos.loc[df_purch_pos['Menge']>0]
+    df_purch_pos['Datum'] = pd.to_datetime(df_purch_pos['Datum'],errors='coerce')
+    df4 = df4.tail(15000).reset_index(drop=True)
+    print(df4.head())
+    print(df4.tail())
+    print(df5.head())
+    print(df5.tail())
+
+    print( df_purch_pos.head())
+    print( df_purch_pos.tail())
+
+
+
+
+    # print(df_purch_pos.tail(10))
+
 
 
     # df1 = pd.read_csv(p1,delimiter="\t", quoting=csv.QUOTE_NONE, error_bad_lines=False)
@@ -107,130 +154,39 @@ def tabellen_zusamenfuegen(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz,p
     df['Preisgruppe'] = df['Preisgruppe'].astype(int)
     # df = df.applymap(lambda x: x.encode('unicode_escape').
     #              decode('utf-8') if isinstance(x, str) else x)
-    # print(df.head())
-    # print(df_werk.tail())
-    df_werk['Datum_begin'] = pd.to_datetime(df_werk['Datum_begin'],format = '%Y-%m-%d',errors='coerce')
-    df_werk = df_werk.dropna()
 
-
-    # print(df_werk.tail(50))
 
     df['AufnahmeDatum'] = pd.to_datetime(df['AufnahmeDatum'], format='%Y-%m-%d', errors='coerce')
     df['letzteLieferung'] = pd.to_datetime(df['letzteLieferung'], format='%Y-%m-%d', errors='coerce')
-
-
-
-    return [simple_merge,df,df_purchases,df_werk]
-
-
-
-
-def export_kunden(df):
-
-
-    # print(df.head())
-
-    file_name = 'kunden_p_Ausland' #.csv
-
-
-#     Filter
-
-
-
-    keine_werbung = True # False : Keine Filter, True: Werbung erlaubt oder NA
-
-    keine_email =False # False : Keine Filter, True: Werbung erlaubt oder NA
-
-    datum_aufgenommen_ab = False #deaktivieren durch False
-
-    datum_letzte_bestellung_ab = '01.01.2018' # deaktivieren durch False
-
-    preisgruppe = 1  #0 = beide, 1 = privat,2= handel
-
-    land = 'Ausland'
-
-    welche_columns = ['KundenNr','Vorname','Name1','Name2','Strasse','Land','PLZ','Ort']   # deaktivieren durch False
-
-    # sortierung
-
-
-    sort = 'Land' #['Land','AufnahmeDatum','letzteLieferung']  deaktivieren durch False
-
-    #If sort == Land:
-    nach_plz = True
-
-    # print(df.head())
-
-    df['AufnahmeDatum'] = pd.to_datetime(df['AufnahmeDatum'], format='%Y-%m-%d', errors='coerce')
-    df['letzteLieferung'] =pd.to_datetime(df['letzteLieferung'], format='%Y-%m-%d', errors='coerce')
-
-    # df['AufnahmeDatum'] = pd.to_datetime(df['AufnahmeDatum'], format='%d.%m.%y', errors='coerce')
-    # df['letzteLieferung'] =pd.to_datetime(df['letzteLieferung'], format='%d.%m.%y', errors='coerce')
-
-
-
-    # print(len(df),df.head())
-    # df['AufnahmeDatum'] = pd.to_datetime(df['AufnahmeDatum'], format='%d.%m.%Y', errors='coerce')
-    # df['letzteLieferung'] =pd.to_datetime(df['letzteLieferung'], format='%d.%m.%Y', errors='coerce')
-
-    # print(df.sort_values(['AufnahmeDatum']))
     print(len(df))
-    print(df.head())
-    if keine_werbung == True:
-        df = df[df['Werbung']!=1]
-    print(len(df))
-    if keine_email == True:
-        df = df[df['E_Werbung']!=1]
-    print(len(df))
-    if datum_aufgenommen_ab != False:
-        df = df[df['AufnahmeDatum']>=dt.strptime(datum_aufgenommen_ab,'%d.%m.%Y')]
-    print(len(df))
-    if datum_letzte_bestellung_ab != False:
-        df = df[df['letzteLieferung']>=dt.strptime(datum_letzte_bestellung_ab,'%d.%m.%Y')]
-    print(len(df))
-    if preisgruppe != 0 :
-        df = df[df['Preisgruppe']==preisgruppe]
-    print(len(df))
-    if land != False and land != 'Inland'and land != 'Ausland':
-        df = df[df['Land']==land]
-    elif land == 'Inland':
-        df = df[df['Land'] == 'DE']
-    elif land == 'Ausland':
-        df = df[df['Land'] != 'DE']
-    #Sorting
-    if sort == 'Land' and nach_plz == True:
+    return [simple_merge, df, df_purchases,df_purch_pos]
 
-        df = df.sort_values(['Land', 'PLZ'])
+def produktion(p1=path_werk):
 
-    elif sort != False:
-        df = df.sort_values([sort],ascending=False)
+    data = json.load(codecs.open(p1, 'r', 'utf-8-sig'))
+    df_werk = pd.DataFrame(data)
 
-
-    df = df.reset_index(drop=True)
-
-
-    if welche_columns != False:
-        df = df[welche_columns]
+    df_werk['Datum_begin'] = pd.to_datetime(df_werk['Datum_begin'], format='%Y-%m-%d', errors='coerce')
+    df_werk = df_werk.dropna()
+    return [df_werk]
 
 
 
 
 
-    df['Land'] = df.Land.replace( 'DE','')
 
-    df['plz_ort'] = df['PLZ']+' '+df['Ort']
-    df['Name'] = df['Vorname'] + ' ' + df['Name1']
-    print(df.head(), len(df))
 
-    df.to_csv('/Users/joan/Desktop/WSZ/'+ file_name + '.csv',index=False,encoding = 'utf-8-sig')
 
 
 
 if __name__ == '__main__':
     t1 = dt.now()
-    simple_merge,df_gesamt,df_purchases = tabellen_zusamenfuegen()
+    simple_merge,df_gesamt,df_purchases,df_purch = vertrieb()
     # analyse_privat_handel(df_gesamt,df_purchases)
-    print(df_gesamt.tail())
+    # df= df_gesamt.loc[df_gesamt['Preisgruppe']==2].sort_values('letzteLieferung',ascending = True).reset_index(drop=True)
+    # df = df.loc[df['letzteLieferung']>dt.strptime('2018','%Y')]
+    # df.to_csv('/Volumes/LaCie/HDD SynDrive/Vertrieb/Kunden Exports/Karte/kunden_partner.csv', index=False, encoding='utf-8-sig')
+    # print(df.head(),len(df))
     print(dt.now()-t1)
     # print(df_gesamt.head(20))
     # print(len(df_gesamt))
@@ -240,3 +196,77 @@ if __name__ == '__main__':
     # country_plts(df_purchases,df_gesamt)
     # draw_plts(df_gesamt)
 
+    # art = '115115-BE'
+    #
+    # df_purch = df_purch.loc[df_purch['Papierart'] == 'R']
+    # df_purch = df_purch.loc[df_purch['ArtNr']==art].reset_index(drop=True)
+    #
+    #
+    # print(df_purch.head(10))
+    # df_purch['month_year'] = df_purch['Datum'].dt.to_period('M')
+    # df_purch = df_purch.groupby('month_year')['Menge'].sum().reset_index()
+    #
+    # print(df_purch)
+    # # plt.plot(df_purch['Menge'])
+    # # plt.xticklabels(df_purch['Datum'])
+    # # plt.show()
+    #
+    # fig, ax = plt.subplots(1, 1)
+    # ax.plot(df_purch.index,df_purch['Menge'])
+    # ax.set_xticks(df_purch.index)
+    # ax.set_xticklabels(df_purch['month_year'])
+    # plt.xticks(rotation=70)
+    # plt.title(art)
+    # plt.tight_layout()
+    #
+    # plt.show()
+
+
+
+    df_purch = df_purch.loc[df_purch['Papierart'] == 'R']
+    df_purch = df_purch.loc[df_purch['Preisgruppe'] == 1]
+    df_purch = df_purch.merge(df_gesamt,on='KundenNr',).reset_index(drop=True)
+    df_purch = df_purch.drop_duplicates(['PapierNr'])
+    # df_purch = df_purch.groupby(['PapierNr'])['Pos Betrag'].sum()
+    #
+    # # l = df_purch['Land'].unique()
+    df_purch = df_purch.loc[df_purch['Datum']>dt.strptime('2020-01','%Y-%m')]
+    df_purch = df_purch.loc[df_purch['Datum'] < dt.strptime('2021-01', '%Y-%m')]
+    l = [ 'FR', 'IT', 'AT', 'ES', 'DK', 'NL','LI', 'IE', 'LU','PL', 'BE','SE', 'CZ','FI','PT', 'MT','ME','LV']
+    # df_purch=df_purch.loc[df_purch['Land'].isin(l)].reset_index(drop=True)
+    rolling = df_purch.groupby(['Datum'])['Endbetrag'].sum().reset_index()
+    rolling['rolling'] = rolling['Endbetrag'].expanding(2).sum()
+    df_purch = df_purch[['Datum','Papierart','PapierNr','KundenNr','Endbetrag','Kundengr','Land']]
+    print(df_purch.tail(5))
+    # df_purch.to_csv('/Volumes/LaCie/HDD SynDrive/Buchhaltung/Auswertungen/Bestellungen EU Ausland/2021.csv',index=False)
+    # print(rolling)
+
+    plt.plot(rolling['Datum'],rolling['rolling'])
+    plt.axhline(10000,color='r')
+    plt.title('2021')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    plt.show()
+
+
+    # lander = df_purch.groupby(['Land'])['Pos Betrag'].sum().sort_values().reset_index()
+    # print(lander,df_purch['Pos Betrag'].sum())
+    #
+    # plt.bar(lander['Land'],lander['Pos Betrag'])
+    # plt.title('2020-Jetzt Gesamt: '+str(round(df_purch['Pos Betrag'].sum(),2)))
+    # plt.show()
+    #
+    #
+    #
+    #
+    # print(df_purch.tail())
+    # print(l)
+    #
+    # df = df_gesamt.loc[df_gesamt['letzteLieferung']>dt.strptime('2018-01','%Y-%m')].sort_values('letzteLieferung')
+    # df = df.loc[df['Preisgruppe'] == 1]
+    # df = df.loc[df['Werbung'] != 1]
+    # df=df.loc[~df['Land'].isin(l)].reset_index(drop=True)
+    # lander = df.groupby(['Land']).size().sort_values()
+    # print(df.tail())
+    # print(lander,lander.sum())
