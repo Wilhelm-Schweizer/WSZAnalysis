@@ -20,7 +20,7 @@ os.environ['QT_MAC_WANTS_LAYER'] = '1'
 
 from pg_stats import MyApp1 as pg_stats
 
-
+from statistics import mean
 config = ConfigParser()
 config.read('config.ini')
 
@@ -40,11 +40,29 @@ from mpl_toolkits.mplot3d import Axes3D
 # import pyqtgraph.examples
 # pyqtgraph.examples.run()
 # path = os.path.dirname(__file__) #uic paths from itself, not the active dir, so path needed
-qtCreatorFile = "GUI_Files/preisgruppen.ui" #Ui file name, from QtDesigner, assumes in same folder as this .py
+# qtCreatorFile = "GUI_Files/preisgruppen.ui" #Ui file name, from QtDesigner, assumes in same folder as this .py
+#
+# Ui_Error, QtBaseClass = uic.loadUiType(qtCreatorFile) #process through pyuic
 
-Ui_Error, QtBaseClass = uic.loadUiType(qtCreatorFile) #process through pyuic
 
-class MyApp1(QMainWindow, Ui_Error): #gui class
+class CustomAxisItem(pg.AxisItem):
+
+    def tickStrings(self, values, scale, spacing):
+        if self.logMode:
+            return self.logTickStrings(values, scale, spacing)
+
+        places = max(0, np.ceil(-np.log10(spacing*scale)))
+        strings = []
+        for v in values:
+            vs = v * scale
+            vstr = ("%%0.%df" % places) % vs
+            strings.append(vstr)
+        return strings
+
+
+from GUI_Files.Preisgruppen import Ui_Preisgruppen
+
+class MyApp1(QMainWindow, Ui_Preisgruppen): #gui class
     def __init__(self,data):
         #The following sets up the gui via Qt
         super(MyApp1, self).__init__()
@@ -69,7 +87,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         self.b_stats.clicked.connect(self.pg_stats_win)
         self.logo.setScaledContents(True)
         self.logo.setPixmap(QPixmap("GUI_Files/logo.png").transformed(QTransform().rotate(-90)))
-        self.dark_mode = config.get('main', 'dark_mode')
+        self.dark_mode = False
         self.main_col = 'k'
         if self.dark_mode == 'True':
             self.setStyleSheet(qdarkstyle.load_stylesheet())
@@ -316,11 +334,37 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
                     ges_df = pd.DataFrame()
                     for i in dic[k][0]:
                         ges_df = ges_df.append(i)
-                    self.threed_plts[dic[k][1]]=ges_df
-
+                    self.threed_plts[dic[k][1]] = ges_df
                     for i in dic[k][0][0:-2]:
                         self.graphWidget.plot(i['month'], i['EUR_sum'],)
-                    print(dic[k][0][-2])
+
+                    l = []
+
+                    for i in range(1, 13):
+                        dicc = {}
+                        ll = []
+
+                        for ii in list(ges_df['year'].unique()):
+
+                            try:
+                                ll.append(ges_df.loc[(ges_df['month'] == i) & (ges_df['year']==ii)]['EUR_sum'].reset_index(drop=True)[0])
+                            except:
+                                pass
+
+                        ll = mean(ll)
+                        dicc['AVG'] = ll
+                        dicc['month'] = i
+                        l.append(dicc)
+
+                    avg = pd.DataFrame(l)
+
+
+
+
+
+
+
+                    self.graphWidget.plot(avg.month, avg.AVG, pen=pg.mkPen(self.main_col, width=3), name='AVG')
                     self.graphWidget.plot(dic[k][0][-2]['month'], dic[k][0][-2]['EUR_sum'], pen=pg.mkPen('b', width=5),name = dic[k][0][-2]['year'][0])
                     self.graphWidget.plot(dic[k][0][-1]['month'], dic[k][0][-1]['EUR_sum'], pen=pg.mkPen('g', width=7),name = dic[k][0][-1]['year'][0])
                     self.graphWidget.showGrid(x=True,y=True)
@@ -336,7 +380,9 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
 
                     dates = self.plt_df['Periode']
                     date_axis = pg.graphicsItems.DateAxisItem.DateAxisItem(orientation='bottom')
-                    self.graphWidget = pg.PlotWidget(axisItems = {'bottom': date_axis})
+
+                    #self.graphWidget.plotItem.setAxisItems({'left': CustomAxisItem('left')})
+                    self.graphWidget = pg.PlotWidget(axisItems = {'left': CustomAxisItem('left'),'bottom': date_axis})
                     self.verticalLayout.addWidget(self.graphWidget,0)
                     self.graphWidget.addLegend()
                     self.graphWidget.plot(dates.values.astype(np.int64) // 10 ** 9, self.plt_df['r_sum'],pen = pg.mkPen(self.main_col, width=5))

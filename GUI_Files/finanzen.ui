@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
-    <height>339</height>
+    <width>466</width>
+    <height>364</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <x>20</x>
       <y>13</y>
       <width>431</width>
-      <height>201</height>
+      <height>301</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -34,14 +34,14 @@
      <item>
       <widget class="QPushButton" name="b_pg">
        <property name="text">
-        <string>Werksaufträge</string>
+        <string>Income Statement</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="b_pg_2">
+      <widget class="QPushButton" name="b_kunden">
        <property name="text">
-        <string>Ressourcen</string>
+        <string>Balance Sheet</string>
        </property>
       </widget>
      </item>
@@ -60,7 +60,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>463</width>
+     <width>466</width>
      <height>22</height>
     </rect>
    </property>

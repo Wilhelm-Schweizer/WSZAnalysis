@@ -46,6 +46,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="b_fin">
+       <property name="text">
+        <string>Finanzen</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="b_settings">
        <property name="text">
         <string>Settings</string>
@@ -68,7 +75,7 @@
      <x>0</x>
      <y>0</y>
      <width>463</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

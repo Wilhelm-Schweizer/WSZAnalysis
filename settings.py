@@ -8,22 +8,22 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 os.environ['QT_MAC_WANTS_LAYER'] = '1'
-from configparser import ConfigParser
-config = ConfigParser()
-conf_path = 'config.ini'
-config.read(conf_path)
-
-
-path_k_exp = config.get('main', 'k_exp_path')
-path_db = config.get('main', 'path_db')
-dark_mode = config.get('main', 'dark_mode')
+# from configparser import ConfigParser
+# config = ConfigParser()
+# conf_path = 'config.ini'
+# config.read(conf_path)
+#
+#
+# path_k_exp = config.get('main', 'k_exp_path')
+# path_db = config.get('main', 'path_db')
+# dark_mode = config.get('main', 'dark_mode')
 
 # path = os.path.dirname(__file__) #uic paths from itself, not the active dir, so path needed
-qtCreatorFile = "GUI_Files/settings.ui" #Ui file name, from QtDesigner, assumes in same folder as this .py
-
-Ui_Settings, QtBaseClass = uic.loadUiType(qtCreatorFile) #process through pyuic
-
-class MyApp1(QMainWindow, Ui_Settings): #gui class
+# qtCreatorFile = "GUI_Files/settings.ui" #Ui file name, from QtDesigner, assumes in same folder as this .py
+#
+# Ui_Settings, QtBaseClass = uic.loadUiType(qtCreatorFile) #process through pyuic
+from GUI_Files.Settings import Ui_settings
+class MyApp1(QMainWindow, Ui_settings): #gui class
     def __init__(self):
         #The following sets up the gui via Qt
         super(MyApp1, self).__init__()

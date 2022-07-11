@@ -10,23 +10,20 @@ pd.options.display.width = 0
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
-from configparser import ConfigParser
-config = ConfigParser()
-config.read('config.ini')
-path_db = config.get('main', 'path_db')
 
+from os import path
 
+path_db = 'W:'
 
-
-path_kunden = path_db+'/Kunden.txt'
-
-path_adressen = path_db+'/Adressen.txt'
-
-path_umsatz = path_db+'/Umsatz_Kunden.txt'
-path_werk = path_db+'/WerksauftrPos.txt'
-path_belegepos = path_db + '/Belege_Pos.txt'
-# path_belegepos ='/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/TEST/Belege_Pos.txt'
-path_belege = path_db + '/Belege.txt'
+# path_kunden = path_db+'/Kunden.txt'
+#
+# path_adressen = path_db+'/Adressen.txt'
+#
+# path_umsatz = path_db+'/Umsatz_Kunden.txt'
+# path_werk = path_db+'/WerksauftrPos.txt'
+# path_belegepos = path_db + '/Belege_Pos.txt'
+# # path_belegepos ='/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/TEST/Belege_Pos.txt'
+# path_belege = path_db + '/Belege.txt'
 # path_kunden = '/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/27.09.21/kunden01.txt'
 # path_adressen = '/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/27.09.21/adressen01.txt'
 # path_kunden = '/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/Datenbank-Export/4D-Datenbankexport/Kunden.txt'
@@ -39,21 +36,37 @@ path_belege = path_db + '/Belege.txt'
 
 
 
-def vertrieb(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz,p4 = path_belege,p5=path_belegepos):
+def vertrieb(path_db=path_db):
 
     # print(p1)
+    p = path.join(path_db ,'Vertrieb')
+
+    p1 = path.join(p , 'Kunden.txt')
+    p2 = path.join(p , 'Adressen.txt')
+    p3 = path.join(p , 'Umsatz_Kunden.txt')
+    p4 = path.join(p , 'Belege.txt')
+    p5 = path.join(p, 'Belege_Pos_short.csv')
+    print(p1)
+    path_mwst = path.join(p, 'EU_MWST.csv')
+    try:
+        data = json.load(codecs.open(p1, 'r', 'utf-8-sig'))
+        df1 = pd.DataFrame(data)
+    except:
+
+        return False
 
 
-    data = json.load(codecs.open(p1, 'r', 'utf-8-sig'))
-    df1 = pd.DataFrame(data)
+
+
     data = json.load(codecs.open(p2, 'r', 'utf-8-sig'))
     df2 = pd.DataFrame(data)
     data = json.load(codecs.open(p3, 'r', 'utf-8-sig'))
     df3 = pd.DataFrame(data)
     data = json.load(codecs.open(p4, 'r', 'utf-8-sig'))
     df4 = pd.DataFrame(data)
-    data = json.load(codecs.open(p5, 'r', 'utf-8-sig'))
-    df5 = pd.DataFrame(data)
+    # data = json.load(codecs.open(p5, 'r', 'utf-8-sig'))
+    df5 = pd.read_csv(p5)
+    mwst = pd.read_csv(path_mwst)[['Land', 'mwst']]
     # print(df1.head())
     # print(df4.head())
     # print(df5.head())
@@ -63,7 +76,7 @@ def vertrieb(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz,p4 = path_beleg
     # df5 = df5.tail(500000)
     # df5.to_json('/Volumes/LaCie/HDD SynDrive/Geschaeftsfuerung/IT/4D/4D Export/TEST/Belege_Pos.txt')
 
-    print(df4.tail())
+
 
     df4 = df4[['Papierart','PapierNr','KundenNr','Datum','ID','Endbetrag','Anzahl_Teile','Zahlungsart_A','Preisgruppe']]
     df4['PapierNr'] = df4['PapierNr'].astype(int)
@@ -77,15 +90,9 @@ def vertrieb(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz,p4 = path_beleg
     df_purch_pos['%_endbetrag'] = df_purch_pos['Pos Betrag']/df_purch_pos['Endbetrag']
     df_purch_pos['%_teile'] = df_purch_pos['Menge']/df_purch_pos['Anzahl_Teile']
     df_purch_pos = df_purch_pos.loc[df_purch_pos['Menge']>0]
-    df_purch_pos['Datum'] = pd.to_datetime(df_purch_pos['Datum'],errors='coerce')
+    #df_purch_pos['Datum'] = pd.to_datetime(df_purch_pos['Datum'],errors='coerce')
     df4 = df4.tail(15000).reset_index(drop=True)
-    print(df4.head())
-    print(df4.tail())
-    print(df5.head())
-    print(df5.tail())
 
-    print( df_purch_pos.head())
-    print( df_purch_pos.tail())
 
 
 
@@ -139,41 +146,78 @@ def vertrieb(p1 = path_kunden,p2 = path_adressen,p3= path_umsatz,p4 = path_beleg
 
 
 
-    # print(merge_1.head(1))
-    # print(merge_1)
     df = pd.merge(merge_1,df3,on= 'KundenNr')
+
     df_ = pd.merge(df, df4, on='KundenNr')
     df_main = pd.merge(df_,df6,on='KundenNr')
     # print(df_main.head())
     df = df_main[['KundenNr','Anrede','Vorname','Name1','Name2','Strasse','Land','PLZ','Ort','Ansprechp','Briefanrede','Telefon','Fax','AufnahmeDatum','Preisgruppe_x','Kundengr','e_Mail','WWW_Adr','Werbung','E_Werbung','WWW_Adr','AdrNr','letzteLieferung','EUR_sum','EUR_mean','Orders','Hausnummer']]
     # print(df.head())
+    # print(df.loc[df['KundenNr']== '17957610'])
+    df = pd.merge(df,mwst,on='Land',how = 'left')
     df = df.rename(columns={'Preisgruppe_x':'Preisgruppe'})
+    # print(df.loc[df['KundenNr']== '17957610'])
     # df['letzteLieferung'] = pd.to_datetime(df['letzteLieferung'],errors='coerce')
     # print(df.head(50))
 
     df['Preisgruppe'] = df['Preisgruppe'].astype(int)
+
+
+
     # df = df.applymap(lambda x: x.encode('unicode_escape').
     #              decode('utf-8') if isinstance(x, str) else x)
 
-
+    # print(df.loc[df['KundenNr']== '17957610'])
+    df.loc[df['Preisgruppe']==2,['mwst']] = ""
     df['AufnahmeDatum'] = pd.to_datetime(df['AufnahmeDatum'], format='%Y-%m-%d', errors='coerce')
     df['letzteLieferung'] = pd.to_datetime(df['letzteLieferung'], format='%Y-%m-%d', errors='coerce')
-    print(len(df))
     return [simple_merge, df, df_purchases,df_purch_pos]
 
-def produktion(p1=path_werk):
+def produktion(path_db=path_db):
 
-    data = json.load(codecs.open(p1, 'r', 'utf-8-sig'))
-    df_werk = pd.DataFrame(data)
+    p = path.join(path_db, 'Produktion')
 
-    df_werk['Datum_begin'] = pd.to_datetime(df_werk['Datum_begin'], format='%Y-%m-%d', errors='coerce')
-    df_werk = df_werk.dropna()
-    return [df_werk]
+    p1 = path.join(p, 'WerksauftrPos.txt')
+    p2 = path.join(p, 'Stueckzeiten.txt')
+    p3 = path.join(p, 'Personal.txt')
+
+    try:
+        data = json.load(codecs.open(p1, 'r', 'utf-8-sig'))
+        df_werk = pd.DataFrame(data)
+
+    except:
+
+        return False
+
+    data = json.load(codecs.open(p2, 'r', 'utf-8-sig'))
+    df_zeit = pd.DataFrame(data)
+    data = json.load(codecs.open(p3, 'r', 'utf-8-sig'))
+    df_pers = pd.DataFrame(data)[['Pers_Nr','Vorname','Name','Std_Satz','ausgeschieden']] #['Pers_Nr','Vorname','Name','Std_Satz','ausgeschieden']
+    df_pers['Name'] = df_pers['Vorname'] + ' ' + df_pers['Name']
+    print(df_pers.head())
+    df_werk['Datum_begin'] = pd.to_datetime(df_werk['Datum_begin'], format='%Y-%m-%d', errors='coerce').dropna()
+    merge = df_werk.merge(df_zeit,on='WAP_Nr',how='left')
+    merge=merge.rename(columns={'Pers__Nr':'Pers_Nr'})
+    merge=merge.merge(df_pers,on='Pers_Nr',how='left')
+    merge['Name'] = merge['Name'] +' ('+ merge['Pers_Nr'].dropna().astype(int).astype(str) +')'
+    print(merge.head())
+    return [merge]
+produktion()
 
 
+def finanzen(path_db=path_db):
 
+    p = path.join(path_db, 'Finanzen')
 
+    p1 = path.join(p, 'IncomeStatement\Monthly.csv')
 
+    try:
+        df_is = pd.read_csv(p1)
+    except:
+
+        return False
+    #print(df_is.head(10))
+    return [df_is]
 
 
 

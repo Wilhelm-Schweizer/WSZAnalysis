@@ -10,21 +10,22 @@ from PyQt5.QtCore import *
 import pandas as pd
 import os
 os.environ['QT_MAC_WANTS_LAYER'] = '1'
-from configparser import ConfigParser
-config = ConfigParser()
-conf_path = 'config.ini'
-config.read(conf_path)
+# from configparser import ConfigParser
+# config = ConfigParser()
+# conf_path = 'config.ini'
+# config.read(conf_path)
 from datetime import datetime as dt
-path = config.get('main', 'path_db')
-dark_mode = config.get('main', 'dark_mode')
-path_k_exp = config.get('main', 'k_exp_path')
+#path = config.get('main', 'path_db')
+dark_mode = False
+from os import path
+path_k_exp = path.join('W:' ,'Exports')
 import shelve
 # path = os.path.dirname(__file__) #uic paths from itself, not the active dir, so path needed
-qtCreatorFile = "GUI_Files/kunden_export.ui" #Ui file name, from QtDesigner, assumes in same folder as this .py
-
-Ui_Settings, QtBaseClass = uic.loadUiType(qtCreatorFile) #process through pyuic
-
-class MyApp1(QMainWindow, Ui_Settings): #gui class
+# qtCreatorFile = "GUI_Files/kunden_export.ui" #Ui file name, from QtDesigner, assumes in same folder as this .py
+#
+# Ui_Settings, QtBaseClass = uic.loadUiType(qtCreatorFile) #process through pyuic
+from GUI_Files.Kunden_Export import Ui_settings
+class MyApp1(QMainWindow, Ui_settings): #gui class
     def __init__(self,data):
         #The following sets up the gui via Qt
         super(MyApp1, self).__init__()
@@ -33,7 +34,7 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
 
         # self.port_in.setText(config.get('main', 'ibkr_port'))
 
-        dark_mode = config.get('main', 'dark_mode')
+        dark_mode = False
         if dark_mode == 'True':
             self.setStyleSheet(qdarkstyle.load_stylesheet())
             # self.logo.setPixmap(QPixmap("GUI_Files/logo_dark.png").transformed(QTransform().rotate(-90)))
@@ -156,21 +157,22 @@ class MyApp1(QMainWindow, Ui_Settings): #gui class
             df = df.loc[df['E_Werbung'] != 1]
 
         df = df.reset_index(drop = True)
-        print(df.tail(50))
+
 
         df['name'] = df['Vorname'] + ' '+ df['Name1']
         df['PLZ_Ort'] = df['PLZ'] + ' '+ df['Ort']
-        df = df[['KundenNr','name','Name2','Strasse','Land','PLZ_Ort']]
+        df = df[['KundenNr','name','Name2','Strasse','Land','PLZ_Ort','e_Mail','mwst','Preisgruppe']]
 
 
         print(path_k_exp+'/'+parms['file']+'.csv')
+        p = path.join(path_k_exp,parms['file']+'.csv')
         try:
-            df.to_csv(path_k_exp+'/'+parms['file']+'.csv',index=False,encoding = 'utf-8-sig')
+            df.to_csv(p,index=False,encoding = 'utf-8-sig')
         except:
             try:
-                os.mkdir(path_k_exp+'/'+parms['file'].split('/')[0])
+                os.mkdir(path.join(path_k_exp,parms['file'].split('/')[0]))
                 # print(path_k_exp+'/'+parms['file'].split('/')[0])
-                df.to_csv(path_k_exp + '/' + parms['file'] + '.csv', index=False, encoding='utf-8-sig')
+                df.to_csv(p, index=False, encoding='utf-8-sig')
             except:
                 pass
 

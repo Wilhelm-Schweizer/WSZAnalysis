@@ -14,80 +14,12 @@
    <string>Länder Analyse</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="verticalLayoutWidget_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>240</y>
-      <width>131</width>
-      <height>721</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_3">
-     <item>
-      <widget class="QComboBox" name="comboBox_3"/>
-     </item>
-     <item>
-      <widget class="QComboBox" name="comboBox_2"/>
-     </item>
-     <item>
-      <widget class="QComboBox" name="comboBox_4"/>
-     </item>
-     <item>
-      <widget class="QComboBox" name="comboBox"/>
-     </item>
-     <item>
-      <widget class="QPushButton" name="refresh_b">
-       <property name="text">
-        <string>Refresh</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="b_stats">
-       <property name="text">
-        <string>Statistiken</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="b_close">
-       <property name="text">
-        <string>Close</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>100</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="logo">
-       <property name="text">
-        <string>TextLabel</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>300</x>
       <y>0</y>
-      <width>1311</width>
+      <width>1161</width>
       <height>971</height>
      </rect>
     </property>
@@ -100,6 +32,75 @@
      </item>
     </layout>
    </widget>
+   <widget class="QWidget" name="formLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>250</y>
+      <width>288</width>
+      <height>275</height>
+     </rect>
+    </property>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="1">
+      <widget class="QComboBox" name="comboBox_3"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Personal #: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Figur: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QPushButton" name="refresh_b">
+       <property name="text">
+        <string>Refresh</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QPushButton" name="b_stats">
+       <property name="text">
+        <string>Statistiken</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QPushButton" name="b_close">
+       <property name="text">
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QFontComboBox" name="fontComboBox"/>
+     </item>
+     <item row="4" column="1">
+      <widget class="QComboBox" name="comboBox"/>
+     </item>
+     <item row="3" column="1">
+      <widget class="QFontComboBox" name="fontComboBox_2"/>
+     </item>
+     <item row="1" column="1">
+      <widget class="QFontComboBox" name="fontComboBox_3"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Arbeitsgang: </string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -107,7 +108,7 @@
      <x>0</x>
      <y>0</y>
      <width>1467</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

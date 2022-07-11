@@ -20,29 +20,29 @@ os.environ['QT_MAC_WANTS_LAYER'] = '1'
 
 from pg_stats import MyApp1 as pg_stats
 
-
-config = ConfigParser()
-config.read('config.ini')
-
-
+#
+# config = ConfigParser()
+# config.read('config.ini')
 
 
 
 
 
 
+
+from GUI_Files.Kunden import Ui_Preisgruppen
 # dark_mode = config.get('main', 'dark_mode')
 
 
 
 # import pyqtgraph.examples
-# pyqtgraph.examples.run()
-# path = os.path.dirname(__file__) #uic paths from itself, not the active dir, so path needed
-qtCreatorFile = "GUI_Files/kunden.ui" #Ui file name, from QtDesigner, assumes in same folder as this .py
+# # pyqtgraph.examples.run()
+# # path = os.path.dirname(__file__) #uic paths from itself, not the active dir, so path needed
+# qtCreatorFile = "GUI_Files/kunden.ui" #Ui file name, from QtDesigner, assumes in same folder as this .py
+#
+# Ui_Error, QtBaseClass = uic.loadUiType(qtCreatorFile) #process through pyuic
 
-Ui_Error, QtBaseClass = uic.loadUiType(qtCreatorFile) #process through pyuic
-
-class MyApp1(QMainWindow, Ui_Error): #gui class
+class MyApp1(QMainWindow, Ui_Preisgruppen): #gui class
     def __init__(self,data):
         #The following sets up the gui via Qt
         super(MyApp1, self).__init__()
@@ -64,13 +64,12 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         self.b_close.clicked.connect(self.close)
         self.refresh_b.clicked.connect(self.refresh)
         self.b_stats.clicked.connect(self.pg_stats_win)
-        self.logo.setScaledContents(True)
-        self.logo.setPixmap(QPixmap("GUI_Files/logo.png").transformed(QTransform().rotate(-90)))
-        self.dark_mode = config.get('main', 'dark_mode')
+
+        self.dark_mode = False
         self.main_col = 'k'
         if self.dark_mode == 'True':
             self.setStyleSheet(qdarkstyle.load_stylesheet())
-            self.logo.setPixmap(QPixmap("GUI_Files/logo_dark.png").transformed(QTransform().rotate(-90)))
+
             self.main_col = 'w'
         # self.checkBox_2.setChecked(True)
 
@@ -87,6 +86,7 @@ class MyApp1(QMainWindow, Ui_Error): #gui class
         self.comboBox_4.setCurrentIndex(0)
         # print(data[0]['Land'].unique().tolist())
         self.comboBox_2.setItemDelegate(delegate)
+        self.comboBox_2.clear()
         l = data[0]['KundenNr'].sort_values().dropna().unique().tolist()
         print(l)
         l = ['Top 4','Top 4 Vergleich','Top'] + l

@@ -39,6 +39,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="b_fig">
+       <property name="text">
+        <string>Figuren</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="b_kunden">
        <property name="text">
         <string>Kunden</string>
@@ -82,7 +89,7 @@
      <x>0</x>
      <y>0</y>
      <width>466</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

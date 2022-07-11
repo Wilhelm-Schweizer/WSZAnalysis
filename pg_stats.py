@@ -14,11 +14,11 @@ import numpy as np
 from datetime import datetime as dt
 from datetime import timedelta
 from configparser import ConfigParser
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+#from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 import matplotlib.pyplot as plt
-
+from GUI_Files.Pg_Stats import Ui_portfolio_divs
 os.environ['QT_MAC_WANTS_LAYER'] = '1'
 config = ConfigParser()
 # config.read('/Users/joan/PycharmProjects/ThetaTrader/config.ini')
@@ -37,11 +37,11 @@ config = ConfigParser()
 
 
 # path = os.path.dirname(__file__) #uic paths from itself, not the active dir, so path needed
-qtCreatorFile = "GUI_Files/pg_stats.ui" #Ui file name, from QtDesigner, assumes in same folder as this .py
+# qtCreatorFile = "GUI_Files/pg_stats.ui" #Ui file name, from QtDesigner, assumes in same folder as this .py
+#
+# Ui_Error, QtBaseClass = uic.loadUiType(qtCreatorFile) #process through pyuic
 
-Ui_Error, QtBaseClass = uic.loadUiType(qtCreatorFile) #process through pyuic
-
-class MyApp1(QMainWindow, Ui_Error): #gui class
+class MyApp1(QMainWindow, Ui_portfolio_divs): #gui class
     def __init__(self,stats):
         #The following sets up the gui via Qt
         super(MyApp1, self).__init__()

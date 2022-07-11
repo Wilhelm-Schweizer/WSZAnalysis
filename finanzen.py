@@ -12,7 +12,7 @@ from configparser import ConfigParser
 config = ConfigParser()
 
 config.read('config.ini')
-from werksauftraege import MyApp1 as werksauftraege
+from incomestatement import MyApp1 as incomestatement
 
 from settings import MyApp1 as settings
 import load_data
@@ -23,7 +23,7 @@ import load_data
 #
 # Ui_Settings, QtBaseClass = uic.loadUiType(qtCreatorFile) #process through pyuic
 
-from GUI_Files.Produktion import  Ui_Main
+from GUI_Files.finanzen import  Ui_Main
 
 class MyApp1(QMainWindow, Ui_Main): #gui class
     def __init__(self,data):
@@ -39,13 +39,13 @@ class MyApp1(QMainWindow, Ui_Main): #gui class
 
         # self.simple_merge, self.df_gesamt, self.df_purchases = load_data.tabellen_zusamenfuegen()
 
-        self.df_werk = data
+        self.df_is = data
 
         #set up callbacks
         self.logo.setScaledContents(True)
         self.logo.setPixmap(QPixmap("GUI_Files/logo.png"))
         self.b_close.clicked.connect(self.close)
-        self.b_pg.clicked.connect(self.werksauftraege_win)
+        self.b_pg.clicked.connect(self.is_win)
         # self.b_Lander.clicked.connect(self.lander_win)
         # self.b_kunden.clicked.connect(self.kunden_win)
         # self.b_settings.clicked.connect(self.settings_win)
@@ -65,8 +65,8 @@ class MyApp1(QMainWindow, Ui_Main): #gui class
         # print(port)
 
 
-    def werksauftraege_win(self):
-        dialog = werksauftraege(self.df_werk)
+    def is_win(self):
+        dialog = incomestatement(self.df_is)
         self.dialogs.append(dialog)
         dialog.show()
 
